@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
 
 class Sigma extends StatefulWidget {
   @override
@@ -30,13 +29,7 @@ class _SigmaState extends State<Sigma> {
     _stopwatch = Stopwatch();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
-        _stopwatch.start();
-        _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-          setState(() {
-            _elapsedSeconds = _stopwatch.elapsed.inSeconds;
-          });
-        });
-
+        _elapsedSeconds = _stopwatch.elapsed.inSeconds;
       });
     });
   }
@@ -175,30 +168,32 @@ class _SigmaState extends State<Sigma> {
                       Image.asset('assets/helloworld_ranged.png', width: 70, height: 70),
                     SizedBox(width: 20),
                     ...marks.map((mark) {
-                      return IconButton(
-                        onPressed: () {
-                          setState(() {
-                            if (selectedMarks[index] != mark) {
-                              previousMarks[index] = selectedMarks[index];
-                              selectedMarks[index] = mark;
-                            } else {
-                              selectedMarks[index] = null; // 토글되도록 선택을 취소합니다.
-                            }
-                          });
-                        },
-                        icon: mark.startsWith("숫자") ? ImageIcon(
-                          AssetImage('number_${mark.substring(2)}.png'),
-                          size: 70,
-                          color: selectedMarks[index] == mark ? Colors.black : null, // 선택되었을 때 아이콘 색상을 변경합니다.
-                        ) : mark.startsWith("속박") ? ImageIcon(
-                          AssetImage('lock_${mark.substring(2)}.png'),
-                          size: 70,
-                          color: selectedMarks[index] == mark ? Colors.black : null, // 선택되었을 때 아이콘 색상을 변경합니다.
-                        ) : Icon(Icons.clear), // 기본적으로 아무 것도 표시하지 않는 아이콘을 사용합니다.
-                        color: selectedMarks[index] == mark ? Colors.grey : null, // 선택되었을 때 배경 색상을 변경합니다.
+                      return Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: selectedMarks[index] == mark ? Colors.blue : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              if (selectedMarks[index] != mark) {
+                                previousMarks[index] = selectedMarks[index];
+                                selectedMarks[index] = mark;
+                              } else {
+                                selectedMarks[index] = null; // 토글되도록 선택을 취소합니다.
+                              }
+                            });
+                          },
+                          icon: mark.startsWith("숫자")
+                              ? Image.asset('assets/number_${mark.substring(2)}.png', width: 70, height: 70)
+                              : mark.startsWith("속박")
+                              ? Image.asset('assets/lock_${mark.substring(2)}.png', width: 70, height: 70)
+                              : Icon(Icons.clear), // 기본적으로 아무 것도 표시하지 않는 아이콘을 사용합니다.
+                          color: selectedMarks[index] == mark ? Colors.grey : null, // 선택되었을 때 배경 색상을 변경합니다.
+                        ),
                       );
-
-
                     }),
                   ],
                 );
@@ -227,3 +222,4 @@ class _SigmaState extends State<Sigma> {
     );
   }
 }
+

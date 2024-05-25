@@ -58,12 +58,17 @@ class _OmegaState extends State<Omega> {
     helloWorldRangedIndexes[1] = indices.removeLast();
   }
 
-  bool validateMarks() {
+  String? validateMarks() {
     // 모든 플레이어에 대해 속박 및 숫자 표식이 정확히 1개씩 할당되었는지 확인합니다.
-    bool allPlayersMarked = selectedMarks.where((mark) => mark != null).length == 4;
+    int markedCount = selectedMarks.where((mark) => mark != null).length;
+    if (markedCount != 4) {
+      return "표식이 정확히 4개 할당되지 않았습니다.";
+    }
 
     // 첫 번째 헬로월드 대상자에게 표식이 찍히지 않았는지 확인합니다.
-    bool firstHelloWorldValid = selectedMarks[helloWorldMeleeIndexes[0]] == null && selectedMarks[helloWorldRangedIndexes[0]] == null;
+    if (selectedMarks[helloWorldMeleeIndexes[0]] != null || selectedMarks[helloWorldRangedIndexes[0]] != null) {
+      return "첫 번째 헬로월드 대상자에게 표식이 찍혔습니다.";
+    }
 
     // 속박징 2개가 올바르게 할당되었는지 확인합니다.
     int shacklesCount = 0;
@@ -72,12 +77,15 @@ class _OmegaState extends State<Omega> {
       if (mark != null && mark.startsWith('속박')) {
         shacklesCount++;
         if (dynamisStacks[i] != 2 || (helloWorldMeleeIndexes[1] != i && helloWorldRangedIndexes[1] != i)) {
-          return false;
+          if (!(helloWorldMeleeIndexes[1] == i && dynamisStacks[i] == 2) &&
+              !(helloWorldRangedIndexes[1] == i && dynamisStacks[i] == 2)) {
+            return "속박징이 잘못 할당되었습니다.";
+          }
         }
       }
     }
     if (shacklesCount != 2) {
-      return false;
+      return "속박징이 2개 할당되지 않았습니다.";
     }
 
     // 숫자징 2개가 올바르게 할당되었는지 확인합니다.
@@ -87,15 +95,15 @@ class _OmegaState extends State<Omega> {
       if (mark != null && mark.startsWith('숫자')) {
         numbersCount++;
         if (dynamisStacks[i] == 2 || helloWorldMeleeIndexes.contains(i) || helloWorldRangedIndexes.contains(i)) {
-          return false;
+          return "숫자징이 잘못 할당되었습니다.";
         }
       }
     }
     if (numbersCount != 2) {
-      return false;
+      return "숫자징이 2개 할당되지 않았습니다.";
     }
 
-    return allPlayersMarked && firstHelloWorldValid;
+    return null;
   }
 
   void startTimer() {
@@ -113,7 +121,8 @@ class _OmegaState extends State<Omega> {
 
   void submitMarks() {
     stopTimer();
-    if (validateMarks()) {
+    String? validationResult = validateMarks();
+    if (validationResult == null) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -135,7 +144,7 @@ class _OmegaState extends State<Omega> {
         context: context,
         builder: (context) => AlertDialog(
           title: Text("오류"),
-          content: Text("각 표식은 정확히 한 번씩 할당되어야 하며, 규칙에 맞게 할당되어야 합니다."),
+          content: Text(validationResult),
           actions: [
             TextButton(
               onPressed: () {
